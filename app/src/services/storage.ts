@@ -13,6 +13,7 @@ export interface SavedDeal {
 }
 
 const STORAGE_KEY = 'real_estate_deals';
+const THEME_KEY = 'real_estate_theme';
 
 export const storageService = {
   saveDeal: (deal: Omit<SavedDeal, 'id' | 'date'>) => {
@@ -51,6 +52,15 @@ export const storageService = {
     const deals = storageService.getAllDeals();
     const filteredDeals = deals.filter(deal => deal.id !== id);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(filteredDeals));
+  },
+
+  saveThemePreference: (mode: 'light' | 'dark') => {
+    localStorage.setItem(THEME_KEY, mode);
+  },
+
+  getThemePreference: (): 'light' | 'dark' | null => {
+    const theme = localStorage.getItem(THEME_KEY);
+    return theme as 'light' | 'dark' | null;
   },
 
   exportDeals: (deals: SavedDeal[], format: 'csv' | 'pdf' | 'excel' = 'csv') => {

@@ -1,38 +1,125 @@
+/* Main App Styles */
 .App {
-  text-align: center;
-}
-
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
 }
 
-.App-link {
-  color: #61dafb;
+/* Smooth Transitions */
+.App * {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
 }
 
-@keyframes App-logo-spin {
+/* Card hover effects */
+.MuiCard-root {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.MuiCard-root:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Button hover effects */
+.MuiButton-contained:not(.Mui-disabled),
+.MuiButton-outlined:not(.Mui-disabled) {
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.MuiButton-contained:not(.Mui-disabled)::after,
+.MuiButton-outlined:not(.Mui-disabled)::after {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.1);
+  top: 0;
+  left: -100%;
+  transition: left 0.3s ease;
+  z-index: -1;
+}
+
+.MuiButton-contained:not(.Mui-disabled):hover::after,
+.MuiButton-outlined:not(.Mui-disabled):hover::after {
+  left: 0;
+}
+
+/* Tab transitions */
+.MuiTab-root {
+  transition: color 0.2s ease, background-color 0.2s ease;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.3);
+}
+
+/* Input focus effects */
+.MuiOutlinedInput-root:focus-within {
+  transform: scale(1.01);
+}
+
+/* Paper transition effects */
+.MuiPaper-root {
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.3s ease;
+}
+
+/* Animate elements on first render */
+@keyframes fadeIn {
   from {
-    transform: rotate(0deg);
+    opacity: 0;
+    transform: translateY(10px);
   }
   to {
-    transform: rotate(360deg);
+    opacity: 1;
+    transform: translateY(0);
   }
 }
+
+.Dashboard-stats {
+  animation: fadeIn 0.5s ease forwards;
+}
+
+.Dashboard-features > div:nth-child(1) { animation: fadeIn 0.5s ease forwards; animation-delay: 0.05s; }
+.Dashboard-features > div:nth-child(2) { animation: fadeIn 0.5s ease forwards; animation-delay: 0.1s; }
+.Dashboard-features > div:nth-child(3) { animation: fadeIn 0.5s ease forwards; animation-delay: 0.15s; }
+.Dashboard-features > div:nth-child(4) { animation: fadeIn 0.5s ease forwards; animation-delay: 0.2s; }
+.Dashboard-features > div:nth-child(5) { animation: fadeIn 0.5s ease forwards; animation-delay: 0.25s; }
+
+.Dashboard-deals > div { 
+  animation: fadeIn 0.5s ease forwards; 
+  animation-delay: calc(0.3s + (0.05s * var(--index, 0))); 
+}
+
+/* Dark mode adjustments */
+@media (prefers-color-scheme: dark) {
+  ::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
+  }
+}
+

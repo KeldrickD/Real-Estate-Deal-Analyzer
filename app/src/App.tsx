@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { 
   CssBaseline, 
   ThemeProvider, 
@@ -12,17 +12,23 @@ import {
   Tab, 
   Paper,
   useMediaQuery,
-  IconButton
+  IconButton,
+  Switch,
+  FormControlLabel
 } from '@mui/material';
 import HomeIcon from '@mui/icons-material/Home';
+import Brightness4Icon from '@mui/icons-material/Brightness4';
+import Brightness7Icon from '@mui/icons-material/Brightness7';
 import './App.css';
 
-// Import the working WholesaleCalculator component
+// Import components
 import WholesaleCalculator from './components/WholesaleCalculator';
 import CreativeFinancingEvaluator from './components/CreativeFinancingEvaluator';
 import MortgageAnalyzer from './components/MortgageAnalyzer';
 import DealComparison from './components/DealComparison';
 import ApartmentAnalysis from './components/ApartmentAnalysis';
+import Dashboard from './components/Dashboard';
+import { storageService } from './services/storage';
 
 // Component placeholders for components that will be fixed next
 const MultiFamilyAnalyzer = () => (
@@ -46,57 +52,6 @@ const CreativeOfferCalculator = () => (
   </Box>
 );
 
-// Create theme
-const theme = createTheme({
-  palette: {
-    primary: {
-      main: '#2e7d32', // Green color for real estate
-    },
-    secondary: {
-      main: '#1976d2', // Blue
-    },
-    background: {
-      default: '#f5f5f5',
-      paper: '#ffffff',
-    },
-  },
-  typography: {
-    h5: {
-      fontWeight: 600,
-    },
-    h6: {
-      fontWeight: 600,
-    },
-    button: {
-      textTransform: 'none',
-      fontWeight: 600,
-    },
-  },
-  components: {
-    MuiAppBar: {
-      styleOverrides: {
-        root: {
-          boxShadow: '0 2px 10px rgba(0, 0, 0, 0.1)',
-        },
-      },
-    },
-    MuiPaper: {
-      styleOverrides: {
-        root: {
-          boxShadow: '0 2px 10px rgba(0, 0, 0, 0.05)',
-        },
-      },
-    },
-    MuiTab: {
-      styleOverrides: {
-        root: {
-          fontWeight: 600,
-        },
-      },
-    },
-  },
-});
-
 // Interface for TabPanel props
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -117,7 +72,7 @@ function TabPanel(props: TabPanelProps) {
       {...other}
     >
       {value === index && (
-        <Box sx={{ py: 3 }}>
+        <Box sx={{ p: 3 }}>
           {children}
         </Box>
       )}
@@ -127,7 +82,89 @@ function TabPanel(props: TabPanelProps) {
 
 function App() {
   const [tabValue, setTabValue] = useState(0);
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const [mode, setMode] = useState<'light' | 'dark'>('light');
+  const isMobile = useMediaQuery('(max-width:600px)');
+  const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
+
+  // Initialize theme based on localStorage or system preference
+  useEffect(() => {
+    const savedTheme = storageService.getThemePreference();
+    if (savedTheme) {
+      setMode(savedTheme);
+    } else {
+      setMode(prefersDarkMode ? 'dark' : 'light');
+    }
+  }, [prefersDarkMode]);
+
+  // Toggle theme function
+  const toggleColorMode = () => {
+    setMode((prevMode) => {
+      const newMode = prevMode === 'light' ? 'dark' : 'light';
+      storageService.saveThemePreference(newMode);
+      return newMode;
+    });
+  };
+
+  // Function to navigate to a specific tab
+  const navigateToTab = (index: number) => {
+    setTabValue(index);
+  };
+
+  // Create theme based on current mode
+  const theme = useMemo(
+    () =>
+      createTheme({
+        palette: {
+          mode,
+          primary: {
+            main: mode === 'dark' ? '#4caf50' : '#2e7d32',
+          },
+          secondary: {
+            main: mode === 'dark' ? '#42a5f5' : '#1976d2',
+          },
+          background: {
+            default: mode === 'dark' ? '#121212' : '#f5f5f5',
+            paper: mode === 'dark' ? '#1e1e1e' : '#ffffff',
+          },
+        },
+        typography: {
+          h5: {
+            fontWeight: 600,
+          },
+          h6: {
+            fontWeight: 600,
+          },
+          button: {
+            textTransform: 'none',
+            fontWeight: 600,
+          },
+        },
+        components: {
+          MuiAppBar: {
+            styleOverrides: {
+              root: {
+                boxShadow: '0 2px 10px rgba(0, 0, 0, 0.1)',
+              },
+            },
+          },
+          MuiPaper: {
+            styleOverrides: {
+              root: {
+                boxShadow: '0 2px 10px rgba(0, 0, 0, 0.05)',
+              },
+            },
+          },
+          MuiTab: {
+            styleOverrides: {
+              root: {
+                fontWeight: 600,
+              },
+            },
+          },
+        },
+      }),
+    [mode],
+  );
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
@@ -144,12 +181,16 @@ function App() {
               color="inherit" 
               aria-label="home"
               sx={{ mr: 2 }}
+              onClick={() => setTabValue(0)}
             >
               <HomeIcon />
             </IconButton>
             <Typography variant="h6" sx={{ flexGrow: 1 }}>
               Real Estate Deal Analyzer
             </Typography>
+            <IconButton sx={{ ml: 1 }} onClick={toggleColorMode} color="inherit">
+              {mode === 'dark' ? <Brightness7Icon /> : <Brightness4Icon />}
+            </IconButton>
           </Toolbar>
         </AppBar>
         
@@ -160,8 +201,10 @@ function App() {
                 value={tabValue}
                 onChange={handleTabChange}
                 aria-label="calculator tabs"
-                variant="fullWidth"
+                variant={isMobile ? "scrollable" : "fullWidth"}
+                scrollButtons={isMobile ? "auto" : undefined}
               >
+                <Tab label="Dashboard" />
                 <Tab label="Wholesale Calculator" />
                 <Tab label="Creative Financing" />
                 <Tab label="Mortgage Analyzer" />
@@ -171,18 +214,21 @@ function App() {
             </Box>
 
             <TabPanel value={tabValue} index={0}>
-              <WholesaleCalculator />
+              <Dashboard onNavigate={navigateToTab} />
             </TabPanel>
             <TabPanel value={tabValue} index={1}>
-              <CreativeFinancingEvaluator />
+              <WholesaleCalculator />
             </TabPanel>
             <TabPanel value={tabValue} index={2}>
-              <MortgageAnalyzer />
+              <CreativeFinancingEvaluator />
             </TabPanel>
             <TabPanel value={tabValue} index={3}>
-              <ApartmentAnalysis />
+              <MortgageAnalyzer />
             </TabPanel>
             <TabPanel value={tabValue} index={4}>
+              <ApartmentAnalysis />
+            </TabPanel>
+            <TabPanel value={tabValue} index={5}>
               <DealComparison />
             </TabPanel>
           </Box>
