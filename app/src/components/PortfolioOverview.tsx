@@ -32,6 +32,8 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import WarningIcon from '@mui/icons-material/Warning';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import InfoIcon from '@mui/icons-material/Info';
+import ErrorIcon from '@mui/icons-material/Error';
+import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import { storageService, SavedDeal } from '../services/storage';
 
 // Types for metric thresholds
@@ -304,35 +306,19 @@ const PortfolioOverview: React.FC<PortfolioOverviewProps> = ({ onViewDeal }) => 
   };
 
   // Get icon for the deal health
-  const getDealHealthIcon = (deal: SavedDeal) => {
+  const getDealHealthIcon = (deal: SavedDeal): React.ReactElement => {
     const dealMetrics = metrics[deal.id];
-    if (!dealMetrics) return null;
+    if (!dealMetrics) return <HelpOutlineIcon color="disabled" />; // Default icon when no metrics
     
-    let status = 'neutral';
+    const health = dealMetrics.performanceScore;
     
-    // Determine status based on the primary metrics for the deal type
-    if (deal.type === 'wholesale' && dealMetrics.profitPotential) {
-      status = getStatusColor('profitPotential', dealMetrics.profitPotential);
-    }
-    else if (dealMetrics.cashOnCashReturn) {
-      status = getStatusColor('cashOnCash', dealMetrics.cashOnCashReturn);
-    }
-    else if (dealMetrics.capRate) {
-      status = getStatusColor('capRate', dealMetrics.capRate);
-    }
-    else if (dealMetrics.dscr) {
-      status = getStatusColor('dscr', dealMetrics.dscr);
-    }
-    
-    if (status === 'success') {
+    if (health >= 80) {
       return <CheckCircleIcon color="success" />;
-    } else if (status === 'warning') {
+    } else if (health >= 50) {
       return <WarningIcon color="warning" />;
-    } else if (status === 'error') {
-      return <WarningIcon color="error" />;
+    } else {
+      return <ErrorIcon color="error" />;
     }
-    
-    return <InfoIcon color="info" />;
   };
 
   // Get color for deal type badge

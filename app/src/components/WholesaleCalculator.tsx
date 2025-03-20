@@ -32,6 +32,7 @@ import { Chart as ChartJS, ArcElement, Tooltip as ChartTooltip, Legend } from 'c
 import InfoIcon from '@mui/icons-material/Info';
 import SaveIcon from '@mui/icons-material/Save';
 import FolderOpenIcon from '@mui/icons-material/FolderOpen';
+import DealAlternatives from './DealAlternatives';
 
 // Import validation utilities
 import { 
@@ -46,6 +47,9 @@ import {
   getAllWholesaleDeals,
   deleteWholesaleDeal
 } from '../utils/localStorage';
+
+// Import storage service
+import { storageService } from '../services/storage';
 
 // Register Chart.js components
 ChartJS.register(ArcElement, ChartTooltip, Legend);
@@ -125,7 +129,11 @@ const QUICK_REPAIR_COSTS = {
   }
 };
 
-const WholesaleCalculator: React.FC = () => {
+interface WholesaleCalculatorProps {
+  selectedDealId?: string | null;
+}
+
+const WholesaleCalculator: React.FC<WholesaleCalculatorProps> = ({ selectedDealId }) => {
   // State for form inputs
   const [inputs, setInputs] = useState<WholesaleInputs>({
     purchasePrice: '',
@@ -177,12 +185,24 @@ const WholesaleCalculator: React.FC = () => {
   const [saveDialogOpen, setSaveDialogOpen] = useState(false);
   const [loadDialogOpen, setLoadDialogOpen] = useState(false);
   const [savedDeals, setSavedDeals] = useState<SavedDeal[]>([]);
+  const [showAlternatives, setShowAlternatives] = useState(false);
+  const [sellerAskingPrice, setSellerAskingPrice] = useState<number>(0);
   
   // Load saved deals on component mount
   useEffect(() => {
     const deals = getAllWholesaleDeals();
     setSavedDeals(deals);
   }, []);
+
+  useEffect(() => {
+    if (selectedDealId) {
+      const savedDeal = getAllWholesaleDeals().find(deal => deal.key === selectedDealId);
+      if (savedDeal) {
+        setInputs(savedDeal.data.inputs);
+        setResults(savedDeal.data.results);
+      }
+    }
+  }, [selectedDealId]);
 
   // Handle input changes with validation
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -201,6 +221,11 @@ const WholesaleCalculator: React.FC = () => {
       ...inputs,
       [name]: value
     });
+
+    // If it's the seller's asking price field, update that state too
+    if (name === 'sellerAskingPrice') {
+      setSellerAskingPrice(parseFloat(value) || 0);
+    }
   };
 
   // Validate all inputs before calculation
@@ -352,6 +377,13 @@ const WholesaleCalculator: React.FC = () => {
       message: 'Deal calculated successfully!',
       severity: 'success'
     });
+
+    // Check if wholesale is feasible by comparing MAO with seller's asking price
+    if (sellerAskingPrice > 0 && sellerAskingPrice > maxAllowableOffer) {
+      setShowAlternatives(true);
+    } else {
+      setShowAlternatives(false);
+    }
   };
   
   // Save deal to localStorage
@@ -401,6 +433,23 @@ const WholesaleCalculator: React.FC = () => {
       open: true,
       message: `Deal "${dealName}" deleted successfully!`,
       severity: 'info'
+    });
+  };
+
+  // Save alternative deal
+  const handleSaveAlternativeDeal = (dealType: string, dealInputs: any, dealResults: any) => {
+    const deal = storageService.saveDeal({
+      type: dealType as "creative" | "advanced" | "wholesale" | "mortgage" | "apartment",
+      name: `Alternative - ${dealInputs.purchasePrice ? formatCurrency(parseFloat(dealInputs.purchasePrice)) : 'Deal'}`,
+      inputs: dealInputs,
+      results: dealResults
+    });
+
+    // Show success message
+    setNotification({
+      open: true,
+      message: `Alternative ${dealType} deal saved successfully!`,
+      severity: 'success'
     });
   };
 
@@ -815,6 +864,27 @@ const WholesaleCalculator: React.FC = () => {
                   </Grid>
                 </Grid>
                 <Grid item xs={12}>
+                  <TextField
+                    fullWidth
+                    label="Seller's Asking Price ($)"
+                    name="sellerAskingPrice"
+                    type="number"
+                    value={sellerAskingPrice || ''}
+                    onChange={handleInputChange}
+                    variant="outlined"
+                    InputProps={{
+                      startAdornment: <InputAdornment position="start">$</InputAdornment>,
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <Tooltip title="The price the seller is asking for the property">
+                            <InfoIcon fontSize="small" color="action" />
+                          </Tooltip>
+                        </InputAdornment>
+                      )
+                    }}
+                  />
+                </Grid>
+                <Grid item xs={12}>
                   <Button 
                     variant="contained" 
                     color="primary" 
@@ -1134,6 +1204,19 @@ const WholesaleCalculator: React.FC = () => {
           {notification.message}
         </Alert>
       </Snackbar>
+
+      {/* Show the Deal Alternatives component if the wholesale deal is not feasible */}
+      {results && showAlternatives && (
+        <Box mt={4}>
+          <Divider sx={{ mb: 4 }} />
+          <DealAlternatives
+            wholesaleInputs={inputs}
+            wholesaleResults={results}
+            sellerAskingPrice={sellerAskingPrice}
+            onSaveDeal={handleSaveAlternativeDeal}
+          />
+        </Box>
+      )}
     </Box>
   );
 };

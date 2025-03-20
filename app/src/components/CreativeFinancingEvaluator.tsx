@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Paper,
@@ -53,7 +53,11 @@ interface CreativeFinancingInputs {
   isInterestOnly: boolean;
 }
 
-const CreativeFinancingEvaluator: React.FC = () => {
+interface CreativeFinancingEvaluatorProps {
+  selectedDealId?: string | null;
+}
+
+const CreativeFinancingEvaluator: React.FC<CreativeFinancingEvaluatorProps> = ({ selectedDealId }) => {
   // State for form inputs
   const [inputs, setInputs] = useState<CreativeFinancingInputs>({
     purchasePrice: '',
@@ -90,6 +94,16 @@ const CreativeFinancingEvaluator: React.FC = () => {
     };
     amortizationSchedule: AmortizationRow[];
   } | null>(null);
+
+  useEffect(() => {
+    if (selectedDealId) {
+      const savedDeal = storageService.getDeal(selectedDealId);
+      if (savedDeal) {
+        setInputs(savedDeal.inputs);
+        setResults(savedDeal.results);
+      }
+    }
+  }, [selectedDealId]);
 
   // Handle input changes
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {

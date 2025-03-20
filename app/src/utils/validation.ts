@@ -68,14 +68,16 @@ export const safeParseInt = (value: string, defaultValue: number = 0): number =>
 };
 
 /**
- * Format currency for display
+ * Format a number as currency
+ * @param value - The number to format
+ * @param maximumFractionDigits - Maximum fraction digits to show (default: 0)
+ * @returns Formatted currency string
  */
-export const formatCurrency = (value: number): string => {
+export const formatCurrency = (value: number, maximumFractionDigits: number = 0): string => {
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'USD',
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
+    maximumFractionDigits
   }).format(value);
 };
 

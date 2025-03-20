@@ -28,6 +28,7 @@ import MortgageAnalyzer from './components/MortgageAnalyzer';
 import DealComparison from './components/DealComparison';
 import ApartmentAnalysis from './components/ApartmentAnalysis';
 import Dashboard from './components/Dashboard';
+import AdvancedFinancing from './components/AdvancedFinancing';
 import { storageService } from './services/storage';
 
 // Component placeholders for components that will be fixed next
@@ -81,7 +82,8 @@ function TabPanel(props: TabPanelProps) {
 }
 
 function App() {
-  const [tabValue, setTabValue] = useState(0);
+  const [activeTab, setActiveTab] = useState(0);
+  const [selectedDealId, setSelectedDealId] = useState<string | null>(null);
   const [mode, setMode] = useState<'light' | 'dark'>('light');
   const isMobile = useMediaQuery('(max-width:600px)');
   const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
@@ -105,9 +107,14 @@ function App() {
     });
   };
 
-  // Function to navigate to a specific tab
-  const navigateToTab = (index: number) => {
-    setTabValue(index);
+  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+    setActiveTab(newValue);
+    setSelectedDealId(null);
+  };
+
+  const handleViewDeal = (tabIndex: number, dealId: string) => {
+    setActiveTab(tabIndex);
+    setSelectedDealId(dealId);
   };
 
   // Create theme based on current mode
@@ -166,10 +173,6 @@ function App() {
     [mode],
   );
 
-  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
-    setTabValue(newValue);
-  };
-
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
@@ -181,7 +184,7 @@ function App() {
               color="inherit" 
               aria-label="home"
               sx={{ mr: 2 }}
-              onClick={() => setTabValue(0)}
+              onClick={() => setActiveTab(0)}
             >
               <HomeIcon />
             </IconButton>
@@ -198,38 +201,42 @@ function App() {
           <Box sx={{ width: '100%', py: 4 }}>
             <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
               <Tabs
-                value={tabValue}
+                value={activeTab}
                 onChange={handleTabChange}
                 aria-label="calculator tabs"
                 variant={isMobile ? "scrollable" : "fullWidth"}
                 scrollButtons={isMobile ? "auto" : undefined}
               >
                 <Tab label="Dashboard" />
-                <Tab label="Wholesale Calculator" />
+                <Tab label="Wholesale" />
                 <Tab label="Creative Financing" />
-                <Tab label="Mortgage Analyzer" />
-                <Tab label="Apartment Analysis" />
+                <Tab label="Mortgage" />
+                <Tab label="Apartment" />
                 <Tab label="Deal Comparison" />
+                <Tab label="Advanced Financing" />
               </Tabs>
             </Box>
 
-            <TabPanel value={tabValue} index={0}>
-              <Dashboard onNavigate={navigateToTab} />
+            <TabPanel value={activeTab} index={0}>
+              <Dashboard onNavigate={setActiveTab} />
             </TabPanel>
-            <TabPanel value={tabValue} index={1}>
-              <WholesaleCalculator />
+            <TabPanel value={activeTab} index={1}>
+              <WholesaleCalculator selectedDealId={selectedDealId} />
             </TabPanel>
-            <TabPanel value={tabValue} index={2}>
-              <CreativeFinancingEvaluator />
+            <TabPanel value={activeTab} index={2}>
+              <CreativeFinancingEvaluator selectedDealId={selectedDealId} />
             </TabPanel>
-            <TabPanel value={tabValue} index={3}>
+            <TabPanel value={activeTab} index={3}>
               <MortgageAnalyzer />
             </TabPanel>
-            <TabPanel value={tabValue} index={4}>
+            <TabPanel value={activeTab} index={4}>
               <ApartmentAnalysis />
             </TabPanel>
-            <TabPanel value={tabValue} index={5}>
+            <TabPanel value={activeTab} index={5}>
               <DealComparison />
+            </TabPanel>
+            <TabPanel value={activeTab} index={6}>
+              <AdvancedFinancing />
             </TabPanel>
           </Box>
         </Container>

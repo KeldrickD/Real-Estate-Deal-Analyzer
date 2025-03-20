@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Paper,
@@ -103,7 +103,11 @@ interface ApartmentInputs {
   externalLinks: string;
 }
 
-const ApartmentAnalysis: React.FC = () => {
+interface ApartmentAnalysisProps {
+  selectedDealId?: string | null;
+}
+
+const ApartmentAnalysis: React.FC<ApartmentAnalysisProps> = ({ selectedDealId }) => {
   // Initialize state
   const [inputs, setInputs] = useState<ApartmentInputs>({
     address: '',
@@ -154,6 +158,16 @@ const ApartmentAnalysis: React.FC = () => {
     marketValue: number;
     maximumAllowableOffer: number;
   } | null>(null);
+
+  useEffect(() => {
+    if (selectedDealId) {
+      const savedDeal = storageService.getDeal(selectedDealId);
+      if (savedDeal) {
+        setInputs(savedDeal.inputs);
+        setResults(savedDeal.results);
+      }
+    }
+  }, [selectedDealId]);
 
   // Handle input changes
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {

@@ -26,8 +26,10 @@ import ApartmentIcon from '@mui/icons-material/Apartment';
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import CompareArrowsIcon from '@mui/icons-material/CompareArrows';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import { storageService } from '../services/storage';
 import PortfolioOverview from './PortfolioOverview';
+import AdvancedFinancing from './AdvancedFinancing';
 
 const featuresList = [
   {
@@ -59,6 +61,12 @@ const featuresList = [
     description: "Compare different deals side by side with visual charts and key metrics",
     icon: <CompareArrowsIcon fontSize="large" color="primary" />,
     tabIndex: 4
+  },
+  {
+    title: "Advanced Financing",
+    description: "Analyze complex financing strategies including lease options, syndication, and loan novation",
+    icon: <AccountBalanceWalletIcon fontSize="large" color="primary" />,
+    tabIndex: 5
   }
 ];
 
@@ -101,6 +109,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
     creativeDeals: 0,
     mortgageDeals: 0,
     apartmentDeals: 0,
+    advancedDeals: 0,
     averageCashFlow: 0
   });
   const [tabValue, setTabValue] = useState(0);
@@ -120,6 +129,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
     const creativeDeals = allDeals.filter(deal => deal.type === 'creative');
     const mortgageDeals = allDeals.filter(deal => deal.type === 'mortgage');
     const apartmentDeals = allDeals.filter(deal => deal.type === 'apartment');
+    const advancedDeals = allDeals.filter(deal => deal.type === 'advanced');
     
     // Calculate average cash flow from all deals with cash flow data
     const dealsWithCashFlow = allDeals.filter(deal => deal.results && deal.results.cashFlow);
@@ -140,6 +150,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
       creativeDeals: creativeDeals.length,
       mortgageDeals: mortgageDeals.length,
       apartmentDeals: apartmentDeals.length,
+      advancedDeals: advancedDeals.length,
       averageCashFlow
     });
   }, []);
@@ -158,6 +169,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
       case 'creative': return '#1976d2';
       case 'mortgage': return '#9c27b0';
       case 'apartment': return '#ed6c02';
+      case 'advanced': return '#333';
       default: return '#757575';
     }
   };
@@ -249,6 +261,11 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
                     label={`Apartment: ${statsData.apartmentDeals}`} 
                     size="small" 
                     sx={{ bgcolor: getTypeColor('apartment'), color: 'white' }}
+                  />
+                  <Chip 
+                    label={`Advanced: ${statsData.advancedDeals}`} 
+                    size="small" 
+                    sx={{ bgcolor: getTypeColor('advanced'), color: 'white' }}
                   />
                 </Box>
               </Paper>

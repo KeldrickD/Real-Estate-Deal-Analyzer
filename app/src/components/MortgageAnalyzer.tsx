@@ -49,7 +49,11 @@ interface MortgageInputs {
   closingCosts: string;
 }
 
-const MortgageAnalyzer: React.FC = () => {
+interface MortgageAnalyzerProps {
+  selectedDealId?: string | null;
+}
+
+const MortgageAnalyzer: React.FC<MortgageAnalyzerProps> = ({ selectedDealId }) => {
   // State for form inputs
   const [inputs, setInputs] = useState<MortgageInputs>({
     loanAmount: '',

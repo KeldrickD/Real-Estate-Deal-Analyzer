@@ -95,7 +95,7 @@
 
 .Dashboard-stats {
   animation: fadeIn 0.5s ease forwards;
-}
+  }
 
 .Dashboard-features > div:nth-child(1) { animation: fadeIn 0.5s ease forwards; animation-delay: 0.05s; }
 .Dashboard-features > div:nth-child(2) { animation: fadeIn 0.5s ease forwards; animation-delay: 0.1s; }

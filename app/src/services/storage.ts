@@ -5,7 +5,7 @@ import 'jspdf-autotable';
 
 export interface SavedDeal {
   id: string;
-  type: 'wholesale' | 'creative' | 'mortgage' | 'apartment';
+  type: 'wholesale' | 'creative' | 'mortgage' | 'apartment' | 'advanced';
   name: string;
   date: string;
   inputs: any;
@@ -75,6 +75,11 @@ export const storageService = {
         exportToExcel(deals);
         break;
     }
+  },
+
+  getDeal: (id: string): SavedDeal | null => {
+    const deals = storageService.getAllDeals();
+    return deals.find(deal => deal.id === id) || null;
   }
 };
 
