@@ -73,18 +73,24 @@ function a11yProps(index: number) {
 }
 
 const defaultWholesaleInputs = {
-  purchasePrice: 0,
-  repairCosts: 0,
-  arv: 0,
-  holdingCosts: 0,
-  closingCosts: 0,
-  marketingCosts: 0,
-  sellingPrice: 0,
-  sellingCosts: 0,
-  holdingPeriod: 0,
-  targetProfit: 0,
-  financingCosts: 0,
-  contingency: 0
+  purchasePrice: "0",
+  repairCosts: "0",
+  arv: "0",
+  holdingCosts: "0",
+  closingCosts: "0",
+  wholesaleFee: "0",
+  dealName: "",
+  squareFootage: "0",
+  propertyCondition: "medium" as "easy" | "medium" | "bad",
+  rehabItems: {
+    kitchen: "0",
+    bathrooms: "0",
+    flooring: "0",
+    paint: "0",
+    hvac: "0",
+    roof: "0",
+    other: "0"
+  }
 };
 
 const defaultWholesaleResults = {
@@ -92,13 +98,13 @@ const defaultWholesaleResults = {
   potentialProfit: 0,
   investorProfit: 0,
   roi: 0,
-  cashOnCashReturn: 0,
-  holdingCosts: 0,
-  totalCosts: 0,
-  netProfit: 0,
-  profitMargin: 0,
-  breakEvenPrice: 0,
-  riskScore: 0
+  preferredOffer: 0,
+  assignmentFee: 0,
+  minimumScore: 0,
+  totalRehabCost: 0,
+  exitPercentage: 0,
+  wholesalePrice: 0,
+  preferredExitPrice: 0
 };
 
 const Dashboard: React.FC = () => {
@@ -152,53 +158,8 @@ const Dashboard: React.FC = () => {
     { 
       label: 'Deal Alternatives', 
       component: <DealAlternatives 
-        wholesaleInputs={{
-          purchasePrice: "0",
-          repairCosts: "0",
-          arv: "0",
-          holdingCosts: "0",
-          closingCosts: "0",
-          marketingCosts: "0",
-          sellingPrice: "0",
-          sellingCosts: "0",
-          holdingPeriod: "0",
-          targetProfit: "0",
-          financingCosts: "0",
-          contingency: "0",
-          wholesaleFee: "0",
-          dealName: "",
-          squareFootage: "0",
-          propertyCondition: "medium",
-          rehabItems: {
-            kitchen: "0",
-            bathrooms: "0",
-            flooring: "0",
-            paint: "0",
-            hvac: "0",
-            roof: "0",
-            other: "0"
-          }
-        }}
-        wholesaleResults={{
-          maxAllowableOffer: 0,
-          potentialProfit: 0,
-          investorProfit: 0,
-          roi: 0,
-          cashOnCashReturn: 0,
-          holdingCosts: 0,
-          totalCosts: 0,
-          netProfit: 0,
-          profitMargin: 0,
-          breakEvenPrice: 0,
-          riskScore: 0,
-          preferredOffer: 0,
-          assignmentFee: 0,
-          minimumScore: 0,
-          totalRehabCost: 0,
-          exitPercentage: 0,
-          wholesalePrice: 0,
-          preferredExitPrice: 0
-        }}
+        wholesaleInputs={defaultWholesaleInputs}
+        wholesaleResults={defaultWholesaleResults}
         sellerAskingPrice={0}
         onSaveDeal={(deal) => console.log('Deal saved:', deal)}
       /> 
@@ -251,55 +212,10 @@ const Dashboard: React.FC = () => {
 
           <TabPanel value={value} index={4}>
             <DealAlternatives 
-              wholesaleInputs={{
-                purchasePrice: "0",
-                repairCosts: "0",
-                arv: "0",
-                holdingCosts: "0",
-                closingCosts: "0",
-                marketingCosts: "0",
-                sellingPrice: "0",
-                sellingCosts: "0",
-                holdingPeriod: "0",
-                targetProfit: "0",
-                financingCosts: "0",
-                contingency: "0",
-                wholesaleFee: "0",
-                dealName: "",
-                squareFootage: "0",
-                propertyCondition: "medium",
-                rehabItems: {
-                  kitchen: "0",
-                  bathrooms: "0",
-                  flooring: "0",
-                  paint: "0",
-                  hvac: "0",
-                  roof: "0",
-                  other: "0"
-                }
-              }}
-              wholesaleResults={{
-                maxAllowableOffer: 0,
-                potentialProfit: 0,
-                investorProfit: 0,
-                roi: 0,
-                cashOnCashReturn: 0,
-                holdingCosts: 0,
-                totalCosts: 0,
-                netProfit: 0,
-                profitMargin: 0,
-                breakEvenPrice: 0,
-                riskScore: 0,
-                preferredOffer: 0,
-                assignmentFee: 0,
-                minimumScore: 0,
-                totalRehabCost: 0,
-                exitPercentage: 0,
-                wholesalePrice: 0,
-                preferredExitPrice: 0
-              }}
-              sellerAskingPrice={0}
-              onSaveDeal={(deal) => console.log('Deal saved:', deal)}
+              wholesaleInputs={defaultWholesaleInputs}
+              wholesaleResults={defaultWholesaleResults}
+              sellerAskingPrice={300000}
+              onSaveDeal={handleSaveDeal}
             />
           </TabPanel>
 
