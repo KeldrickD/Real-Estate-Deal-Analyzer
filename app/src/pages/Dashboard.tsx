@@ -40,6 +40,9 @@ import DealAlternatives from '../components/DealAlternatives';
 import TaxCalculator from '../components/TaxCalculator';
 import AutomatedDealAnalyzer from '../components/AutomatedDealAnalyzer';
 import RentalAnalyzer from '../components/RentalAnalyzer';
+import DevelopmentProjectAnalyzer from '../components/DevelopmentProjectAnalyzer';
+import ProjectManagementDashboard from '../components/ProjectManagementDashboard';
+import OfferPriceNegotiator from '../components/OfferPriceNegotiator';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -62,14 +65,50 @@ function TabPanel(props: TabPanelProps) {
   );
 }
 
+function a11yProps(index: number) {
+  return {
+    id: `dashboard-tab-${index}`,
+    'aria-controls': `dashboard-tabpanel-${index}`,
+  };
+}
+
+const defaultWholesaleInputs = {
+  purchasePrice: 0,
+  repairCosts: 0,
+  arv: 0,
+  holdingCosts: 0,
+  closingCosts: 0,
+  marketingCosts: 0,
+  sellingPrice: 0,
+  sellingCosts: 0,
+  holdingPeriod: 0,
+  targetProfit: 0,
+  financingCosts: 0,
+  contingency: 0
+};
+
+const defaultWholesaleResults = {
+  maxAllowableOffer: 0,
+  potentialProfit: 0,
+  investorProfit: 0,
+  roi: 0,
+  cashOnCashReturn: 0,
+  holdingCosts: 0,
+  totalCosts: 0,
+  netProfit: 0,
+  profitMargin: 0,
+  breakEvenPrice: 0,
+  riskScore: 0
+};
+
 const Dashboard: React.FC = () => {
-  const [tabValue, setTabValue] = useState(0);
+  const [value, setValue] = useState(0);
   const [dealAnalysis, setDealAnalysis] = useState<DealAnalysis | null>(null);
   const [alternatives, setAlternatives] = useState<any[]>([]);
   const [savedAnalyses, setSavedAnalyses] = useState<DealAnalysis[]>([]);
 
-  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
-    setTabValue(newValue);
+  const handleChange = (event: React.SyntheticEvent, newValue: number) => {
+    setValue(newValue);
   };
 
   const handleSaveAnalysis = async () => {
@@ -97,6 +136,75 @@ const Dashboard: React.FC = () => {
     console.log('Deal saved:', dealType, dealInputs, dealResults);
   };
 
+  const tabs = [
+    { label: 'Automated Deal Analysis', component: <AutomatedDealAnalyzer /> },
+    { label: 'Rental Analysis', component: <RentalAnalyzer /> },
+    { label: 'Offer Price Negotiator', component: <OfferPriceNegotiator /> },
+    { 
+      label: 'Tax Calculator', 
+      component: <TaxCalculator 
+        propertyValue={0}
+        purchaseDate={new Date()}
+        propertyType="residential"
+        onSaveTaxAnalysis={(analysis) => console.log('Tax analysis saved:', analysis)}
+      /> 
+    },
+    { 
+      label: 'Deal Alternatives', 
+      component: <DealAlternatives 
+        wholesaleInputs={{
+          purchasePrice: "0",
+          repairCosts: "0",
+          arv: "0",
+          holdingCosts: "0",
+          closingCosts: "0",
+          marketingCosts: "0",
+          sellingPrice: "0",
+          sellingCosts: "0",
+          holdingPeriod: "0",
+          targetProfit: "0",
+          financingCosts: "0",
+          contingency: "0",
+          wholesaleFee: "0",
+          dealName: "",
+          squareFootage: "0",
+          propertyCondition: "medium",
+          rehabItems: {
+            kitchen: "0",
+            bathrooms: "0",
+            flooring: "0",
+            paint: "0",
+            hvac: "0",
+            roof: "0",
+            other: "0"
+          }
+        }}
+        wholesaleResults={{
+          maxAllowableOffer: 0,
+          potentialProfit: 0,
+          investorProfit: 0,
+          roi: 0,
+          cashOnCashReturn: 0,
+          holdingCosts: 0,
+          totalCosts: 0,
+          netProfit: 0,
+          profitMargin: 0,
+          breakEvenPrice: 0,
+          riskScore: 0,
+          preferredOffer: 0,
+          assignmentFee: 0,
+          minimumScore: 0,
+          totalRehabCost: 0,
+          exitPercentage: 0,
+          wholesalePrice: 0,
+          preferredExitPrice: 0
+        }}
+        sellerAskingPrice={0}
+        onSaveDeal={(deal) => console.log('Deal saved:', deal)}
+      /> 
+    }
+  ];
+
   return (
     <Container maxWidth="xl">
       <Box sx={{ width: '100%', mt: 4 }}>
@@ -104,75 +212,101 @@ const Dashboard: React.FC = () => {
           Real Estate Deal Analyzer
         </Typography>
 
-        <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
+        <Paper sx={{ width: '100%', mb: 2 }}>
           <Tabs
-            value={tabValue}
-            onChange={handleTabChange}
+            value={value}
+            onChange={handleChange}
             aria-label="dashboard tabs"
+            variant="scrollable"
+            scrollButtons="auto"
           >
-            <Tab label="Automated Analysis" />
-            <Tab label="Rental Analysis" />
-            <Tab label="Tax Calculator" />
-            <Tab label="Deal Alternatives" />
+            <Tab label="Deal Analysis" {...a11yProps(0)} />
+            <Tab label="Development Projects" {...a11yProps(1)} />
+            <Tab label="Project Management" {...a11yProps(2)} />
+            <Tab label="Tax Calculator" {...a11yProps(3)} />
+            <Tab label="Deal Alternatives" {...a11yProps(4)} />
+            <Tab label="Offer Price Negotiator" {...a11yProps(5)} />
           </Tabs>
-        </Box>
 
-        <TabPanel value={tabValue} index={0}>
-          <AutomatedDealAnalyzer />
-        </TabPanel>
+          <TabPanel value={value} index={0}>
+            <AutomatedDealAnalyzer />
+          </TabPanel>
 
-        <TabPanel value={tabValue} index={1}>
-          <RentalAnalyzer />
-        </TabPanel>
+          <TabPanel value={value} index={1}>
+            <DevelopmentProjectAnalyzer />
+          </TabPanel>
 
-        <TabPanel value={tabValue} index={2}>
-          <TaxCalculator 
-            propertyValue={250000}
-            purchaseDate={new Date()}
-            propertyType="residential"
-            onSaveTaxAnalysis={handleSaveTaxAnalysis}
-          />
-        </TabPanel>
+          <TabPanel value={value} index={2}>
+            <ProjectManagementDashboard />
+          </TabPanel>
 
-        <TabPanel value={tabValue} index={3}>
-          <DealAlternatives 
-            wholesaleInputs={{
-              purchasePrice: "300000",
-              repairCosts: "20000",
-              arv: "250000",
-              holdingCosts: "5000",
-              closingCosts: "3000",
-              wholesaleFee: "5000",
-              dealName: "Sample Deal",
-              squareFootage: "1500",
-              propertyCondition: "medium",
-              rehabItems: {
-                kitchen: "5000",
-                bathrooms: "3000",
-                flooring: "2000",
-                paint: "1000",
-                hvac: "3000",
-                roof: "5000",
-                other: "1000"
-              }
-            }}
-            wholesaleResults={{
-              maxAllowableOffer: 230000,
-              potentialProfit: 20000,
-              investorProfit: 15000,
-              roi: 25,
-              preferredOffer: 220000,
-              assignmentFee: 10000,
-              minimumScore: 70,
-              totalRehabCost: 20000,
-              exitPercentage: 75,
-              wholesalePrice: 240000,
-              preferredExitPrice: 250000
-            }}
-            sellerAskingPrice={300000}
-            onSaveDeal={handleSaveDeal}
-          />
-        </TabPanel>
+          <TabPanel value={value} index={3}>
+            <TaxCalculator 
+              propertyValue={250000}
+              purchaseDate={new Date()}
+              propertyType="residential"
+              onSaveTaxAnalysis={handleSaveTaxAnalysis}
+            />
+          </TabPanel>
+
+          <TabPanel value={value} index={4}>
+            <DealAlternatives 
+              wholesaleInputs={{
+                purchasePrice: "0",
+                repairCosts: "0",
+                arv: "0",
+                holdingCosts: "0",
+                closingCosts: "0",
+                marketingCosts: "0",
+                sellingPrice: "0",
+                sellingCosts: "0",
+                holdingPeriod: "0",
+                targetProfit: "0",
+                financingCosts: "0",
+                contingency: "0",
+                wholesaleFee: "0",
+                dealName: "",
+                squareFootage: "0",
+                propertyCondition: "medium",
+                rehabItems: {
+                  kitchen: "0",
+                  bathrooms: "0",
+                  flooring: "0",
+                  paint: "0",
+                  hvac: "0",
+                  roof: "0",
+                  other: "0"
+                }
+              }}
+              wholesaleResults={{
+                maxAllowableOffer: 0,
+                potentialProfit: 0,
+                investorProfit: 0,
+                roi: 0,
+                cashOnCashReturn: 0,
+                holdingCosts: 0,
+                totalCosts: 0,
+                netProfit: 0,
+                profitMargin: 0,
+                breakEvenPrice: 0,
+                riskScore: 0,
+                preferredOffer: 0,
+                assignmentFee: 0,
+                minimumScore: 0,
+                totalRehabCost: 0,
+                exitPercentage: 0,
+                wholesalePrice: 0,
+                preferredExitPrice: 0
+              }}
+              sellerAskingPrice={0}
+              onSaveDeal={(deal) => console.log('Deal saved:', deal)}
+            />
+          </TabPanel>
+
+          <TabPanel value={value} index={5}>
+            <OfferPriceNegotiator />
+          </TabPanel>
+        </Paper>
       </Box>
     </Container>
   );
