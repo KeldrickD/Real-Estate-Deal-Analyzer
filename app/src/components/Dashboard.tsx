@@ -16,7 +16,9 @@ import {
   ListItemText,
   Avatar,
   Chip,
-  IconButton
+  IconButton,
+  Tabs,
+  Tab
 } from '@mui/material';
 import HomeWorkIcon from '@mui/icons-material/HomeWork';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
@@ -25,6 +27,7 @@ import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import CompareArrowsIcon from '@mui/icons-material/CompareArrows';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import { storageService } from '../services/storage';
+import PortfolioOverview from './PortfolioOverview';
 
 const featuresList = [
   {
@@ -63,6 +66,33 @@ interface DashboardProps {
   onNavigate: (tabIndex: number) => void;
 }
 
+interface TabPanelProps {
+  children?: React.ReactNode;
+  index: number;
+  value: number;
+}
+
+// TabPanel component
+function TabPanel(props: TabPanelProps) {
+  const { children, value, index, ...other } = props;
+
+  return (
+    <div
+      role="tabpanel"
+      hidden={value !== index}
+      id={`dashboard-tabpanel-${index}`}
+      aria-labelledby={`dashboard-tab-${index}`}
+      {...other}
+    >
+      {value === index && (
+        <Box sx={{ py: 3 }}>
+          {children}
+        </Box>
+      )}
+    </div>
+  );
+}
+
 const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
   const [recentDeals, setRecentDeals] = useState<any[]>([]);
   const [statsData, setStatsData] = useState({
@@ -73,6 +103,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
     apartmentDeals: 0,
     averageCashFlow: 0
   });
+  const [tabValue, setTabValue] = useState(0);
 
   useEffect(() => {
     const allDeals = storageService.getAllDeals();
@@ -131,6 +162,19 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
     }
   };
 
+  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+    setTabValue(newValue);
+  };
+
+  const handleViewDeal = (tabIndex: number, dealId: string) => {
+    // Navigate to the specific calculator tab
+    onNavigate(tabIndex);
+    
+    // The specific view for the deal will need to be implemented in each calculator component
+    // We could potentially store the selected deal ID in localStorage to be picked up by the calculator
+    localStorage.setItem('selected_deal_id', dealId);
+  };
+
   return (
     <Box sx={{ mb: 4 }}>
       <Box sx={{ mb: 4, textAlign: 'center' }}>
@@ -143,139 +187,160 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
         <Divider sx={{ mb: 4 }} />
       </Box>
 
-      {/* Stats Cards */}
-      <Grid container spacing={3} sx={{ mb: 4 }} className="Dashboard-stats">
-        <Grid item xs={12} sm={6} md={4}>
-          <Paper elevation={2} sx={{ p: 2, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            <Typography variant="subtitle2" color="textSecondary" gutterBottom>
-              Total Deals
-            </Typography>
-            <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
-              {statsData.totalDeals}
-            </Typography>
-          </Paper>
-        </Grid>
-        <Grid item xs={12} sm={6} md={4}>
-          <Paper elevation={2} sx={{ p: 2, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            <Typography variant="subtitle2" color="textSecondary" gutterBottom>
-              Average Cash Flow
-            </Typography>
-            <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
-              {formatCurrency(statsData.averageCashFlow)}/yr
-            </Typography>
-          </Paper>
-        </Grid>
-        <Grid item xs={12} sm={6} md={4}>
-          <Paper elevation={2} sx={{ p: 2, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            <Typography variant="subtitle2" color="textSecondary" gutterBottom>
-              Deal Breakdown
-            </Typography>
-            <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', justifyContent: 'center' }}>
-              <Chip 
-                label={`Wholesale: ${statsData.wholesaleDeals}`} 
-                size="small" 
-                sx={{ bgcolor: getTypeColor('wholesale'), color: 'white' }}
-              />
-              <Chip 
-                label={`Creative: ${statsData.creativeDeals}`} 
-                size="small" 
-                sx={{ bgcolor: getTypeColor('creative'), color: 'white' }}
-              />
-              <Chip 
-                label={`Mortgage: ${statsData.mortgageDeals}`} 
-                size="small" 
-                sx={{ bgcolor: getTypeColor('mortgage'), color: 'white' }}
-              />
-              <Chip 
-                label={`Apartment: ${statsData.apartmentDeals}`} 
-                size="small" 
-                sx={{ bgcolor: getTypeColor('apartment'), color: 'white' }}
-              />
-            </Box>
-          </Paper>
-        </Grid>
-      </Grid>
-
-      {/* Features */}
-      <Typography variant="h5" gutterBottom sx={{ mb: 3 }}>
-        Calculators & Tools
-      </Typography>
-      <Grid container spacing={3} sx={{ mb: 6 }} className="Dashboard-features">
-        {featuresList.map((feature, index) => (
-          <Grid item xs={12} sm={6} md={4} key={index}>
-            <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-              <CardContent sx={{ flexGrow: 1 }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                  {feature.icon}
-                  <Typography variant="h6" component="h2" sx={{ ml: 1 }}>
-                    {feature.title}
-                  </Typography>
-                </Box>
-                <Typography variant="body2" color="text.secondary">
-                  {feature.description}
+      {/* Dashboard Tabs */}
+      <Box sx={{ width: '100%', mb: 4 }}>
+        <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+          <Tabs 
+            value={tabValue} 
+            onChange={handleTabChange} 
+            aria-label="dashboard tabs"
+            centered
+          >
+            <Tab label="Dashboard Overview" />
+            <Tab label="Portfolio Analysis" />
+          </Tabs>
+        </Box>
+        
+        <TabPanel value={tabValue} index={0}>
+          {/* Stats Cards */}
+          <Grid container spacing={3} sx={{ mb: 4 }} className="Dashboard-stats">
+            <Grid item xs={12} sm={6} md={4}>
+              <Paper elevation={2} sx={{ p: 2, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                <Typography variant="subtitle2" color="textSecondary" gutterBottom>
+                  Total Deals
                 </Typography>
-              </CardContent>
-              <CardActions>
-                <Button 
-                  size="small" 
-                  variant="outlined" 
-                  onClick={() => onNavigate(feature.tabIndex)}
-                >
-                  Open Calculator
-                </Button>
-              </CardActions>
-            </Card>
+                <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
+                  {statsData.totalDeals}
+                </Typography>
+              </Paper>
+            </Grid>
+            <Grid item xs={12} sm={6} md={4}>
+              <Paper elevation={2} sx={{ p: 2, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                <Typography variant="subtitle2" color="textSecondary" gutterBottom>
+                  Average Cash Flow
+                </Typography>
+                <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
+                  {formatCurrency(statsData.averageCashFlow)}/yr
+                </Typography>
+              </Paper>
+            </Grid>
+            <Grid item xs={12} sm={6} md={4}>
+              <Paper elevation={2} sx={{ p: 2, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                <Typography variant="subtitle2" color="textSecondary" gutterBottom>
+                  Deal Breakdown
+                </Typography>
+                <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', justifyContent: 'center' }}>
+                  <Chip 
+                    label={`Wholesale: ${statsData.wholesaleDeals}`} 
+                    size="small" 
+                    sx={{ bgcolor: getTypeColor('wholesale'), color: 'white' }}
+                  />
+                  <Chip 
+                    label={`Creative: ${statsData.creativeDeals}`} 
+                    size="small" 
+                    sx={{ bgcolor: getTypeColor('creative'), color: 'white' }}
+                  />
+                  <Chip 
+                    label={`Mortgage: ${statsData.mortgageDeals}`} 
+                    size="small" 
+                    sx={{ bgcolor: getTypeColor('mortgage'), color: 'white' }}
+                  />
+                  <Chip 
+                    label={`Apartment: ${statsData.apartmentDeals}`} 
+                    size="small" 
+                    sx={{ bgcolor: getTypeColor('apartment'), color: 'white' }}
+                  />
+                </Box>
+              </Paper>
+            </Grid>
           </Grid>
-        ))}
-      </Grid>
 
-      {/* Recent Deals */}
-      {recentDeals.length > 0 && (
-        <>
-          <Typography variant="h5" gutterBottom sx={{ mb: 2 }}>
-            Recent Deals
+          {/* Features */}
+          <Typography variant="h5" gutterBottom sx={{ mb: 3 }}>
+            Calculators & Tools
           </Typography>
-          <Grid container spacing={3} className="Dashboard-deals">
-            {recentDeals.map((deal, index) => (
-              <Grid item xs={12} sm={6} md={4} key={index} style={{ "--index": index } as React.CSSProperties}>
-                <Paper elevation={2} sx={{ p: 2 }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                    <Avatar 
-                      sx={{ 
-                        bgcolor: getTypeColor(deal.type), 
-                        width: 32, 
-                        height: 32, 
-                        mr: 1
-                      }}
-                    >
-                      {deal.type.charAt(0).toUpperCase()}
-                    </Avatar>
-                    <Typography variant="subtitle1" noWrap sx={{ maxWidth: '70%' }}>
-                      {deal.name}
-                    </Typography>
-                  </Box>
-                  
-                  <Typography variant="caption" color="text.secondary" display="block">
-                    Created: {new Date(deal.date).toLocaleDateString()}
-                  </Typography>
-                  
-                  {deal.results && deal.results.cashFlow && (
-                    <Box sx={{ mt: 1 }}>
-                      <Typography variant="body2">
-                        <strong>Cash Flow:</strong> {formatCurrency(
-                          typeof deal.results.cashFlow === 'object' 
-                            ? deal.results.cashFlow.annualCashFlow / 12 
-                            : deal.results.cashFlow / 12
-                        )}/mo
+          <Grid container spacing={3} sx={{ mb: 6 }} className="Dashboard-features">
+            {featuresList.map((feature, index) => (
+              <Grid item xs={12} sm={6} md={4} key={index}>
+                <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+                  <CardContent sx={{ flexGrow: 1 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                      {feature.icon}
+                      <Typography variant="h6" component="h2" sx={{ ml: 1 }}>
+                        {feature.title}
                       </Typography>
                     </Box>
-                  )}
-                </Paper>
+                    <Typography variant="body2" color="text.secondary">
+                      {feature.description}
+                    </Typography>
+                  </CardContent>
+                  <CardActions>
+                    <Button 
+                      size="small" 
+                      variant="outlined" 
+                      onClick={() => onNavigate(feature.tabIndex)}
+                    >
+                      Open Calculator
+                    </Button>
+                  </CardActions>
+                </Card>
               </Grid>
             ))}
           </Grid>
-        </>
-      )}
+
+          {/* Recent Deals */}
+          {recentDeals.length > 0 && (
+            <>
+              <Typography variant="h5" gutterBottom sx={{ mb: 2 }}>
+                Recent Deals
+              </Typography>
+              <Grid container spacing={3} className="Dashboard-deals">
+                {recentDeals.map((deal, index) => (
+                  <Grid item xs={12} sm={6} md={4} key={index} style={{ "--index": index } as React.CSSProperties}>
+                    <Paper elevation={2} sx={{ p: 2 }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                        <Avatar 
+                          sx={{ 
+                            bgcolor: getTypeColor(deal.type), 
+                            width: 32, 
+                            height: 32, 
+                            mr: 1
+                          }}
+                        >
+                          {deal.type.charAt(0).toUpperCase()}
+                        </Avatar>
+                        <Typography variant="subtitle1" noWrap sx={{ maxWidth: '70%' }}>
+                          {deal.name}
+                        </Typography>
+                      </Box>
+                      
+                      <Typography variant="caption" color="text.secondary" display="block">
+                        Created: {new Date(deal.date).toLocaleDateString()}
+                      </Typography>
+                      
+                      {deal.results && deal.results.cashFlow && (
+                        <Box sx={{ mt: 1 }}>
+                          <Typography variant="body2">
+                            <strong>Cash Flow:</strong> {formatCurrency(
+                              typeof deal.results.cashFlow === 'object' 
+                                ? deal.results.cashFlow.annualCashFlow / 12 
+                                : deal.results.cashFlow / 12
+                            )}/mo
+                          </Typography>
+                        </Box>
+                      )}
+                    </Paper>
+                  </Grid>
+                ))}
+              </Grid>
+            </>
+          )}
+        </TabPanel>
+        
+        <TabPanel value={tabValue} index={1}>
+          <PortfolioOverview onViewDeal={handleViewDeal} />
+        </TabPanel>
+      </Box>
     </Box>
   );
 };
